@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5399] on 23 July 2022 at 6:58:48 pm'!
-'Description Rename system category and better file errors support'!
-!provides: 'SystemCategoryAutoSaving' 1 0!
+'From Cuis 6.0 [latest update: #5462] on 20 August 2022 at 7:40:06 pm'!
+'Description System organization refactoring'!
+!provides: 'SystemCategoryAutoSaving' 1 1!
 SystemOrganization addCategory: 'SystemCategoryAutoSaving'!
 
 
@@ -35,19 +35,37 @@ SingleFileSystemCategoryAutoSaver class
 	instanceVariableNames: ''!
 
 
-!SystemCategoryAutoSaver methodsFor: 'backup' stamp: 'HAW 7/22/2022 15:38:34'!
+!SystemCategoryAutoSaver methodsFor: 'backup' stamp: 'HAW 8/20/2022 19:27:11'!
 fileOut: fileStream
+	
+	| categories |
+	
+	categories := SystemOrganization withSubCategoriesOf: categoryName.
+	categories size = 1 
+		ifTrue: [ self fileOutSingleCategoryOn: fileStream]
+		ifFalse: [ self fileOutRootCategoryWithAll: categories on: fileStream ]
+		! !
 
-	(SystemOrganization hasCategory: categoryName) 
-		ifTrue: [ self fileOutExistingCategoryOn: fileStream ]
-		ifFalse: [ self class stopAndRemoveAutosaverFor: categoryName ]! !
+!SystemCategoryAutoSaver methodsFor: 'backup' stamp: 'HAW 8/20/2022 18:41:34'!
+fileOutExistingCategory: aCategory on: fileStream
 
-!SystemCategoryAutoSaver methodsFor: 'backup' stamp: 'HAW 7/22/2022 15:56:18'!
-fileOutExistingCategoryOn: fileStream
-
-	^ [ SystemOrganization fileOutCategory: categoryName on: fileStream initializing: true ] 
+	^ [ SystemOrganization fileOutCategory: aCategory on: fileStream initializing: true ] 
 		on: FileWriteError 
 		do: [ :writeError | self stopSavingAndInform: writeError ]! !
+
+!SystemCategoryAutoSaver methodsFor: 'backup' stamp: 'HAW 8/20/2022 19:05:23'!
+fileOutRootCategoryWithAll: categories on: fileStream
+
+	"I assume that categories will not be removed while saving... - Hernan"
+	
+	categories do: [ :aCategory | self fileOutExistingCategory: aCategory on: fileStream ].! !
+
+!SystemCategoryAutoSaver methodsFor: 'backup' stamp: 'HAW 8/20/2022 18:42:58'!
+fileOutSingleCategoryOn: fileStream
+
+	^ (SystemOrganization hasCategory: categoryName) 
+		ifTrue: [ self fileOutExistingCategory: categoryName on: fileStream ]
+		ifFalse: [ self class stopAndRemoveAutosaverFor: categoryName ]! !
 
 !SystemCategoryAutoSaver methodsFor: 'backup' stamp: 'HAW 7/22/2022 15:55:46'!
 informWriteError: error
