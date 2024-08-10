@@ -1,36 +1,36 @@
-'From Cuis 6.0 [latest update: #5462] on 20 August 2022 at 7:40:06 pm'!
-'Description System organization refactoring'!
-!provides: 'SystemCategoryAutoSaving' 1 1!
-SystemOrganization addCategory: 'SystemCategoryAutoSaving'!
+'From Cuis7.1 [latest update: #6578] on 10 August 2024 at 4:42:56 pm'!
+'Description Udated to Cuis 7.1'!
+!provides: 'SystemCategoryAutoSaving' 1 2!
+SystemOrganization addCategory: #SystemCategoryAutoSaving!
 
 
-!classDefinition: #SystemCategoryAutoSaver category: 'SystemCategoryAutoSaving'!
+!classDefinition: #SystemCategoryAutoSaver category: #SystemCategoryAutoSaving!
 Object subclass: #SystemCategoryAutoSaver
 	instanceVariableNames: 'categoryName delay activated targetDirectory savingStrategy'
 	classVariableNames: 'AutosavedCategories'
 	poolDictionaries: ''
 	category: 'SystemCategoryAutoSaving'!
-!classDefinition: 'SystemCategoryAutoSaver class' category: 'SystemCategoryAutoSaving'!
+!classDefinition: 'SystemCategoryAutoSaver class' category: #SystemCategoryAutoSaving!
 SystemCategoryAutoSaver class
 	instanceVariableNames: ''!
 
-!classDefinition: #MultiFileSystemCategoryAutoSaver category: 'SystemCategoryAutoSaving'!
+!classDefinition: #MultiFileSystemCategoryAutoSaver category: #SystemCategoryAutoSaving!
 SystemCategoryAutoSaver subclass: #MultiFileSystemCategoryAutoSaver
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'SystemCategoryAutoSaving'!
-!classDefinition: 'MultiFileSystemCategoryAutoSaver class' category: 'SystemCategoryAutoSaving'!
+!classDefinition: 'MultiFileSystemCategoryAutoSaver class' category: #SystemCategoryAutoSaving!
 MultiFileSystemCategoryAutoSaver class
 	instanceVariableNames: ''!
 
-!classDefinition: #SingleFileSystemCategoryAutoSaver category: 'SystemCategoryAutoSaving'!
+!classDefinition: #SingleFileSystemCategoryAutoSaver category: #SystemCategoryAutoSaving!
 SystemCategoryAutoSaver subclass: #SingleFileSystemCategoryAutoSaver
 	instanceVariableNames: 'targetFileName'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'SystemCategoryAutoSaving'!
-!classDefinition: 'SingleFileSystemCategoryAutoSaver class' category: 'SystemCategoryAutoSaving'!
+!classDefinition: 'SingleFileSystemCategoryAutoSaver class' category: #SystemCategoryAutoSaving!
 SingleFileSystemCategoryAutoSaver class
 	instanceVariableNames: ''!
 
@@ -185,10 +185,13 @@ stopAndRemoveAutosaverFor: aCategoryName
 	(AutosavedCategories removeKey: aCategoryName) stop.
 	! !
 
-!SystemCategoryAutoSaver class methodsFor: 'initialization' stamp: 'HAW 7/23/2022 18:47:03'!
+!SystemCategoryAutoSaver class methodsFor: 'initialization' stamp: 'jmv 7/30/2024 15:29:01'!
 initialize
 
-	AutosavedCategories := Dictionary new.! !
+	AutosavedCategories := Dictionary new.
+
+	BrowserWindow at: #systemCategoriesListMenuSpec registerMenuAndShortcutsSpecProvider:
+		(MessageSend receiver: self selector: #systemCategoriesListMenuSpec).! !
 
 !SystemCategoryAutoSaver class methodsFor: 'instance creation' stamp: 'HAW 7/23/2022 18:42:42'!
 for: aCategoryName withDelayOf: aNumberOfSeconds
@@ -214,24 +217,21 @@ menuDescription
 
 	self subclassResponsibility! !
 
-!SystemCategoryAutoSaver class methodsFor: 'browser menues' stamp: 'HAW 7/23/2022 17:53:46'!
-systemCategoryMenuOptions
-
-	^{ 
-		{
-				#itemGroup 		-> 		30.
-				#itemOrder 		-> 		15.
-				#label 			-> 	 #systemCategoryAutosaveMenuLabel.
-				#object 			-> 		#model.
-				#selector 		-> 		#toggleSystemCategoryAutosave.
-				#icon 			-> 		#fileOutIcon
-			} asDictionary.
-		}! !
-
 !SystemCategoryAutoSaver class methodsFor: 'assertions' stamp: 'HAW 7/23/2022 18:42:42'!
 assertIsValidDelay: aNumberOfSeconds
 
 	^ aNumberOfSeconds < 1 ifTrue: [ self error: 'Number of seconds must be greather or equal to 1' ]! !
+
+!SystemCategoryAutoSaver class methodsFor: 'menu & kbd shortcuts' stamp: 'jmv 7/30/2024 15:30:46'!
+systemCategoriesListMenuSpec
+	"
+	BrowserWindow at: #systemCategoriesListMenuSpec registerMenuAndShortcutsSpecProvider:
+		(MessageSend receiver: SystemCategoryAutoSaver selector: #systemCategoriesListMenuSpec).
+	Do this in SystemCategoryAutoSaver class >> initialize
+	"
+	^#(
+		#(71		#systemCategoryAutosaveMenuLabel 											nil 	model 			toggleSystemCategoryAutosave 								fileOutIcon)
+	)! !
 
 !MultiFileSystemCategoryAutoSaver methodsFor: 'file' stamp: 'HAW 7/23/2022 18:56:13'!
 fileName
