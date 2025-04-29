@@ -1,6 +1,6 @@
-'From Cuis7.1 [latest update: #6578] on 10 August 2024 at 4:42:56 pm'!
-'Description Udated to Cuis 7.1'!
-!provides: 'SystemCategoryAutoSaving' 1 2!
+'From Cuis7.3 [latest update: #7102] on 29 April 2025 at 8:31:31 am'!
+'Description Unload menues'!
+!provides: 'SystemCategoryAutoSaving' 1 3!
 SystemOrganization addCategory: #SystemCategoryAutoSaving!
 
 
@@ -185,13 +185,21 @@ stopAndRemoveAutosaverFor: aCategoryName
 	(AutosavedCategories removeKey: aCategoryName) stop.
 	! !
 
-!SystemCategoryAutoSaver class methodsFor: 'initialization' stamp: 'jmv 7/30/2024 15:29:01'!
+!SystemCategoryAutoSaver class methodsFor: 'initialization' stamp: 'HAW 4/29/2025 08:18:23'!
 initialize
 
 	AutosavedCategories := Dictionary new.
 
-	BrowserWindow at: #systemCategoriesListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: self selector: #systemCategoriesListMenuSpec).! !
+	BrowserWindow 
+		at: #systemCatListMenuSpec 
+		registerMenuAndShortcutsSpecProvider: self systemCatListMenuSpecSend! !
+
+!SystemCategoryAutoSaver class methodsFor: 'initialization' stamp: 'HAW 4/29/2025 08:18:31'!
+unload
+
+	BrowserWindow 
+		at: #systemCatListMenuSpec 
+		unregisterMenuAndShortcutsSpecProvider: self systemCatListMenuSpecSend! !
 
 !SystemCategoryAutoSaver class methodsFor: 'instance creation' stamp: 'HAW 7/23/2022 18:42:42'!
 for: aCategoryName withDelayOf: aNumberOfSeconds
@@ -222,16 +230,17 @@ assertIsValidDelay: aNumberOfSeconds
 
 	^ aNumberOfSeconds < 1 ifTrue: [ self error: 'Number of seconds must be greather or equal to 1' ]! !
 
-!SystemCategoryAutoSaver class methodsFor: 'menu & kbd shortcuts' stamp: 'jmv 7/30/2024 15:30:46'!
-systemCategoriesListMenuSpec
-	"
-	BrowserWindow at: #systemCategoriesListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: SystemCategoryAutoSaver selector: #systemCategoriesListMenuSpec).
-	Do this in SystemCategoryAutoSaver class >> initialize
-	"
+!SystemCategoryAutoSaver class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 4/29/2025 08:22:01'!
+systemCatListMenuSpec
+	
 	^#(
-		#(71		#systemCategoryAutosaveMenuLabel 											nil 	model 			toggleSystemCategoryAutosave 								fileOutIcon)
+		#(300		#systemCategoryAutosaveMenuLabel 											nil 	model 			toggleSystemCategoryAutosave 								fileOutIcon)
 	)! !
+
+!SystemCategoryAutoSaver class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 4/29/2025 08:18:11'!
+systemCatListMenuSpecSend
+
+	^ MessageSend receiver: self selector: #systemCatListMenuSpec! !
 
 !MultiFileSystemCategoryAutoSaver methodsFor: 'file' stamp: 'HAW 7/23/2022 18:56:13'!
 fileName
@@ -312,12 +321,12 @@ stopAutosave
 	SystemCategoryAutoSaver stopAndRemoveAutosaverFor: selectedSystemCategory.
 	self inform: 'Autosaver stopped.'! !
 
-!Browser methodsFor: '*SystemCategoryAutoSaving' stamp: 'HAW 7/23/2022 18:57:02'!
+!Browser methodsFor: '*SystemCategoryAutoSaving' stamp: 'HAW 4/29/2025 08:21:42'!
 systemCategoryAutosaveMenuLabel
 	
 	^(SystemCategoryAutoSaver hasAutosaverFor: self selectedSystemCategory)
-		ifTrue: [ 'stop autosave' ]
-		ifFalse: [ 'start autosave' ]! !
+		ifTrue: [ 'Stop Autosave' ]
+		ifFalse: [ 'Start Autosave' ]! !
 
 !Browser methodsFor: '*SystemCategoryAutoSaving' stamp: 'HAW 7/23/2022 17:53:46'!
 toggleSystemCategoryAutosave
